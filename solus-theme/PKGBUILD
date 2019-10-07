@@ -1,0 +1,50 @@
+# Maintainer: nightuser <nightuser at ya dot ru>
+
+pkgname=solus-theme
+_pkgname=plata-theme
+pkgver=0.9.0
+pkgrel=5
+pkgdesc='A Gtk+ theme based on Material Design Refresh'
+arch=('any')
+url='https://gitlab.com/tista500/plata-theme'
+license=('CCPL' 'GPL2')
+makedepends=('git' 'inkscape' 'libxml2' 'parallel' 'sassc' 'zip')
+optdepends=('gtk-engine-murrine: for gtk2 themes'
+            'ttf-roboto: Recommended font'
+            'marco: Mate support, a package rebuild is required')
+source=("$_pkgname"::"git+https://gitlab.com/tista500/plata-theme.git#tag=${pkgver}")
+sha256sums=('SKIP')
+
+build() {
+  cd "$_pkgname"
+
+  ./autogen.sh \
+    --prefix='/usr' \
+    --enable-parallel \
+    --enable-plank \
+    --enable-gtk_next \
+    --enable-telegram \
+    --enable-tweetdeck \
+    --disable-cinnamon \
+    --disable-gtk_legacy \
+    --disable-openbox \
+    --disable-unity \
+    --disable-mate \
+    --with-selection_color=#5294e2 \
+    --with-accent_color=#84beea \
+    --with-suggestion_color=#4fa2e1 \
+    --with-destruction_color=#f05f7e
+    
+  make -j1 # it uses GNU Parallel instead
+}
+
+package() {
+  cd "$_pkgname"
+
+  make DESTDIR="$pkgdir" install
+
+  install -dm 755 "$pkgdir"/usr/share/plank/themes
+  ln -s /usr/share/themes/Plata/plank "$pkgdir"/usr/share/plank/themes/Plata
+
+  install -Dm 644 LICENSE_CC_BY_SA4 -t "$pkgdir"/usr/share/licenses/"$_pkgname"/
+}
